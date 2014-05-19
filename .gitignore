@@ -1,0 +1,9 @@
+.DS_Store
+*~
+*.log
+*.log.*
+target/**
+lib_managed/**/*
+lib_managed/*
+.scala_dependencies
+benchmarkresults/

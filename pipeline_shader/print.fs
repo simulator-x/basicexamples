@@ -1,3 +1,5 @@
+#version 100
+precision highp float;
 uniform sampler2D jvr_Texture0;
 varying vec2 texCoord;
 
