@@ -25,7 +25,6 @@
     <orderEntry type="module" module-name="remote" />
     <orderEntry type="module" module-name="cv" />
     <orderEntry type="module" module-name="gui" />
-    <orderEntry type="module" module-name="json" />
   </component>
 </module>
 
