@@ -21,11 +21,6 @@
     <orderEntry type="module" module-name="editor" exported="" />
     <orderEntry type="module" module-name="lwjgl-sound" exported="" />
     <orderEntry type="module" module-name="vrpn" exported="" />
-    <orderEntry type="module" module-name="atn" exported="" />
-    <orderEntry type="module" module-name="remote" exported="" />
-    <orderEntry type="module" module-name="cv" exported="" />
-    <orderEntry type="module" module-name="gui" exported="" />
-    <orderEntry type="module" module-name="tuio" exported="" />
   </component>
 </module>
 
