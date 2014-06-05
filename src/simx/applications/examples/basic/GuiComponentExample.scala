@@ -30,7 +30,6 @@ import simx.core.entity.Entity
 import simx.components.renderer.gui.ontology.{types => lt}
 import scala.util.Random
 import simx.core.components.renderer.setup.BasicDisplayConfiguration
-import simplex3d.math.floatx.ConstVec2f
 
 
 /**
@@ -67,32 +66,6 @@ class GuiComponentExample extends SimXApplication with JVRInit with EventHandler
     exitOnClose(components(gfxName), shutdown)   
     guiComponent = Some(components(guiName))
     start(ExecutionStrategy where components(guiName) runs Soft(60))
-
-
-//    handleDevice(types.Keyboard) {
-//      (kb: Entity) =>
-//        val beginPos = types.Position2D.withAnnotations(simx.core.ontology.Symbols.begin)(ConstVec2f(0.15f,-0.15f))
-//        val endPos = types.Position2D.withAnnotations(simx.core.ontology.Symbols.end)(ConstVec2f(0.15f, 0.15f))
-//        val duration = types.TimeInSeconds(3)
-//        val size = types.Vector2(ConstVec2f(0.2f, 0.1f))
-//        val text = types.String("Test")
-//        val layer = types.Integer(3)
-//        val textureFile = types.File("assets/vis/textures/backgroundAttributePanel.png")
-//
-//        kb.observe(types.Key_m).first {
-//          pressed => if (pressed) {
-//              LocalEvents.flyingNotification.emit(
-//                beginPos,
-//                endPos,
-//                size,
-//                duration,
-//                text,
-//                layer,
-//                textureFile
-//              )
-//            }
-//        }
-//    }
   }
 
   private var textSVar: Option[StateParticle[String]] = None
@@ -175,6 +148,7 @@ class GuiComponentExample extends SimXApplication with JVRInit with EventHandler
           }
         })
       })
+
       println("[GuiTest] button pressed: " + e.get(types.Name))
     })
 

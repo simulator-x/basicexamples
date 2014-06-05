@@ -15,17 +15,17 @@
     </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
-    <orderEntry type="module" module-name="core" />
-    <orderEntry type="module" module-name="jbullet" />
-    <orderEntry type="module" module-name="jvr" />
-    <orderEntry type="module" module-name="editor" />
-    <orderEntry type="module" module-name="lwjgl-sound" />
-    <orderEntry type="module" module-name="vrpn" />
-    <orderEntry type="module" module-name="atn" />
-    <orderEntry type="module" module-name="remote" />
-    <orderEntry type="module" module-name="cv" />
-    <orderEntry type="module" module-name="gui" />
-    <orderEntry type="module" module-name="tuio" />
+    <orderEntry type="module" module-name="core" exported="" />
+    <orderEntry type="module" module-name="jbullet" exported="" />
+    <orderEntry type="module" module-name="jvr" exported="" />
+    <orderEntry type="module" module-name="editor" exported="" />
+    <orderEntry type="module" module-name="lwjgl-sound" exported="" />
+    <orderEntry type="module" module-name="vrpn" exported="" />
+    <orderEntry type="module" module-name="atn" exported="" />
+    <orderEntry type="module" module-name="remote" exported="" />
+    <orderEntry type="module" module-name="cv" exported="" />
+    <orderEntry type="module" module-name="gui" exported="" />
+    <orderEntry type="module" module-name="tuio" exported="" />
   </component>
 </module>
 

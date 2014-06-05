@@ -25,7 +25,7 @@ import simx.core.components.physics.ImplicitEitherConversion._
 import simx.core.components.physics.PhysSphere
 import simx.core.ontology.EntityDescription
 import simx.components.sound.SoundMaterial
-import simplex3d.math.floatx.{ConstVec3f, Mat4x3f, ConstMat4f}
+import simplex3d.math.float.{ConstVec3, Mat4x3, ConstMat4}
 import simx.core.worldinterface.naming.NameIt
 
 /**
@@ -38,7 +38,7 @@ import simx.core.worldinterface.naming.NameIt
  * @param radius The radius of the ball. Must be larger than 0.
  * @param position The inital position of the ball.
  */
-case class Ball(name : String, radius : Float, position : ConstVec3f) extends EntityDescription (name,
+case class Ball(name : String, radius : Float, position : ConstVec3) extends EntityDescription (name,
   PhysSphere(
     restitution    = 0.998f,
     transform      = position,
@@ -46,7 +46,7 @@ case class Ball(name : String, radius : Float, position : ConstVec3f) extends En
   ),
   ShapeFromFile(
     file           = "assets/vis/ball.dae",
-    scale          = ConstMat4f(Mat4x3f.scale(radius*2f)),
+    scale          = ConstMat4(Mat4x3.scale(radius*2f)),
     transformation = ReadFromElseWhere
   ),
   SoundMaterial("ball"),

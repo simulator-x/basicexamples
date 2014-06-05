@@ -1,4 +1,29 @@
 /*
+ * Copyright 2014 The SIRIS Project
+ *
+ *    Licensed under the Apache License, Version 2.0 (the "License");
+ *    you may not use this file except in compliance with the License.
+ *    You may obtain a copy of the License at
+ *
+ *        http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *    Unless required by applicable law or agreed to in writing, software
+ *    distributed under the License is distributed on an "AS IS" BASIS,
+ *    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *    See the License for the specific language governing permissions and
+ *    limitations under the License.
+ *
+ * The SIRIS Project is a cooperation between Beuth University, Berlin and the
+ * HCI Group at the University of Würzburg. The project is funded by the German
+ * Federal Ministry of Education and Research (grant no. 17N4409).
+ */
+
+package simx.applications.examples.basic.calibration
+
+/**
+ * Created by dwiebusch on 19.05.14
+ */
+/*
  * Copyright 2012 The SIRIS Project
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
@@ -18,15 +43,13 @@
  * Federal Ministry of Education and Research (grant no. 17N4409).
  */
 
-package simx.applications.examples.basic
-
 import simx.components.renderer.jvr.{JVRPickEvent, JVRComponentAspect, JVRInit}
 import simx.core.{ApplicationConfig, SimXApplicationMain, SimXApplication}
 import simx.core.component.{Soft, ExecutionStrategy}
 import simx.core.components.renderer.createparameter.ReadFromElseWhere
 import simx.core.components.physics.ImplicitEitherConversion._
 import simx.core.entity.Entity
-import simx.core.ontology.{types, EntityDescription}
+import simx.core.ontology.{Symbols, types, EntityDescription}
 import simx.components.sound.{SoundMaterial, LWJGLSoundComponentAspect, OpenALInit}
 import simx.core.components.renderer.createparameter.ShapeFromFile
 import simx.core.components.physics.PhysSphere
@@ -41,16 +64,20 @@ import collection.immutable
 import util.Random
 import simx.core.worldinterface.eventhandling.{EventHandler, EventProvider}
 import simx.core.components.io.SpeechEvents
+import simx.core.components.renderer.setup.ConfigurableDisplayConfiguration
+
+
+
 
 /**
  * TODO: Document
  * @author Dennis Wiebusch, Martin Fischbach
  */
-object ExampleApplication extends SimXApplicationMain[ExampleApplication] {
+object ScreenCalibration extends SimXApplicationMain[ScreenCalibration] {
   val useEditor = askForOption("Use Editor Component?")
 }
 
-class ExampleApplication(args : Array[String]) extends SimXApplication
+class ScreenCalibration(args : Array[String]) extends SimXApplication
 with JVRInit with OpenALInit with RemoteCreation with EventProvider with EventHandler
 {
   //Component names
@@ -59,13 +86,17 @@ with JVRInit with OpenALInit with RemoteCreation with EventProvider with EventHa
   val soundName = 'sound
   val gfxName = 'renderer
 
+  val displaySetupDesc = new ConfigurableDisplayConfiguration
+  private var rendererEntity : Option[Entity] = None
+
   override protected def applicationConfiguration = ApplicationConfig withComponent
-    JVRComponentAspect(gfxName) /*on "renderNode"*/ and
+    JVRComponentAspect(gfxName, displaySetupDesc.getDescription) /*on "renderNode"*/ and
     JBulletComponentAspect(physicsName, ConstVec3(0, -9.81f, 0)) /*on "physicsNode"*/ and
     LWJGLSoundComponentAspect(soundName) /*on "soundNode"*/ and
-    EditorComponentAspect(editorName, appName = "MasterControlProgram") iff ExampleApplication.useEditor
+    EditorComponentAspect(editorName, appName = "MasterControlProgram") iff ScreenCalibration.useEditor
 
   protected def configureComponents(components: immutable.Map[Symbol, SVarActor.Ref]) {
+    println("configured renderer with " + displaySetupDesc)
     exitOnClose(components(gfxName), shutdown) // register for exit on close
     start(ExecutionStrategy where
       components(physicsName) runs Soft(60) and
@@ -75,6 +106,12 @@ with JVRInit with OpenALInit with RemoteCreation with EventProvider with EventHa
       //components(physicsName) isTriggeredBy components(gfxName) and
       //components(gfxName) isTriggeredBy components(physicsName) startWith Set(components(physicsName))
     )
+
+    addJobIn(5000){
+      handleRegisteredEntities(Symbols.component.value.toSymbol :: Symbols.graphics.value.toSymbol:: gfxName :: Nil){
+        entities => rendererEntity = entities.headOption
+      }
+    }
   }
 
   private var tableEntityOption: Option[Entity] = None
@@ -100,6 +137,13 @@ with JVRInit with OpenALInit with RemoteCreation with EventProvider with EventHa
         NameIt("the ball")
       )
 
+    new EntityDescription("thePlane",
+      ShapeFromFile(
+        file = "models/plane.dae",
+        transformation = ConstMat4(Mat4x3.translate(Vec3(0,0,-0.6f)))
+      )
+    ).realize()
+
     ballDescription.realize(entityComplete)
     Light("the light", Vec3(-4f, 8f, -7f), Vec3(270f, -25f, 0f)).realize(entityComplete)
     Table("the table", Vec3(3f, 1f, 2f), Vec3(0f, -1.5f, -7f)).realize((tableEntity: Entity) => {
@@ -116,7 +160,7 @@ with JVRInit with OpenALInit with RemoteCreation with EventProvider with EventHa
   protected def finishConfiguration() {
     rotateTable()
     initializePicking()
-    initializeBallSpawning()
+    setupKeyBindings()
     initializeMouseControl()
     SpeechEvents.token.observe{ event =>
       val text = event.values.firstValueFor(types.String)
@@ -145,7 +189,6 @@ with JVRInit with OpenALInit with RemoteCreation with EventProvider with EventHa
   private def rotateTable() {
     addJobIn(16L){
       tableEntityOption.collect{ case tableEntity =>
-        //In complex applications it is reasonable to check if the list is not empty, rather than just call 'head'
         tableEntity.get(types.Transformation).first(
           currentTransform => tableEntity.set(types.Transformation(rotate(currentTransform))))
       }
@@ -156,15 +199,82 @@ with JVRInit with OpenALInit with RemoteCreation with EventProvider with EventHa
   private def rotate(mat: ConstMat4) =
     mat * ConstMat4(Mat4x3.rotateY(0.01f))
 
-  private def initializeBallSpawning() {
+  private def setupKeyBindings() {
+    handleDevice(types.User){
+      e => e.set(types.ViewPlatform(ConstMat4(Mat4x3.translate(Vec3(0,0,2f)))))
+    }
+
     handleDevice(types.Keyboard){ keyboardEntity =>
       keyboardEntity.observe(types.Key_Space).first( pressed => if(pressed) spawnBall() )
       keyboardEntity.observe(types.Key_t).first{ pressed =>
-        if(pressed) {
-          println("[info][ExampleApplication] Test event emitted")
-          SpeechEvents.token.emit(types.String("test"), types.Time(10L))
+        if (pressed) {
+          displaySetupDesc.setFullscrean(!displaySetupDesc.getFullscrean)
+          updateDisplayDesc()
         }
       }
+      keyboardEntity.observe(types.Key_Left).first{ pressed =>
+        if (pressed) {
+          displaySetupDesc.setScreenTransform(displaySetupDesc.getScreenTransform * ConstMat4(Mat4x3.translate(Vec3(-0.005f, 0, 0))))
+          updateDisplayDesc()
+        }
+      }
+      keyboardEntity.observe(types.Key_Right).first{ pressed =>
+        if (pressed) {
+          displaySetupDesc.setScreenTransform(displaySetupDesc.getScreenTransform * ConstMat4(Mat4x3.translate(Vec3(0.005f, 0, 0))))
+          updateDisplayDesc()
+        }
+      }
+      keyboardEntity.observe(types.Key_Up).first{ pressed =>
+        if (pressed) {
+          displaySetupDesc.setScreenTransform(displaySetupDesc.getScreenTransform * ConstMat4(Mat4x3.translate(Vec3(0, 0.005f, 0))))
+          updateDisplayDesc()
+        }
+      }
+      keyboardEntity.observe(types.Key_Down).first{ pressed =>
+        if (pressed) {
+          displaySetupDesc.setScreenTransform(displaySetupDesc.getScreenTransform * ConstMat4(Mat4x3.translate(Vec3(0, -0.005f, 0))))
+          updateDisplayDesc()
+        }
+      }
+
+      keyboardEntity.observe(types.Key_a).first{ pressed =>
+        if (pressed) {
+          val screenSize = displaySetupDesc.getSizeOfScreen
+          displaySetupDesc.setSizeOfScreen(screenSize._1 - 0.105, screenSize._2)
+          updateDisplayDesc()
+        }
+      }
+      keyboardEntity.observe(types.Key_d).first{ pressed =>
+        if (pressed) {
+          val screenSize = displaySetupDesc.getSizeOfScreen
+          displaySetupDesc.setSizeOfScreen(screenSize._1 + 0.105, screenSize._2)
+          updateDisplayDesc()
+        }
+      }
+      keyboardEntity.observe(types.Key_w).first{ pressed =>
+        if (pressed) {
+          val screenSize = displaySetupDesc.getSizeOfScreen
+          displaySetupDesc.setSizeOfScreen(screenSize._1, screenSize._2 + 0.105)
+          updateDisplayDesc()
+        }
+      }
+      keyboardEntity.observe(types.Key_s).first{ pressed =>
+        if (pressed) {
+          val screenSize = displaySetupDesc.getSizeOfScreen
+          displaySetupDesc.setSizeOfScreen(screenSize._1, screenSize._2 - 0.105)
+          updateDisplayDesc()
+        }
+      }
+
+
+    }
+  }
+
+  private def updateDisplayDesc(){
+    rendererEntity.collect{
+      case entity =>
+        println("updating to " + displaySetupDesc)
+        entity.set(types.DisplaySetupDescription(displaySetupDesc.getDescription))
     }
   }
 
@@ -191,18 +301,7 @@ with JVRInit with OpenALInit with RemoteCreation with EventProvider with EventHa
   private def initializeMouseControl() {
     handleDevice(types.User)(doIt)
     handleDevice(types.Mouse){ mouseEntity =>
-      mouseEntity.observe(types.Position2D).first{
-        newMousePosition => userEntityOption.collect{
-          case userEntity => userEntity.set(types.ViewPlatform(calculateView(newMousePosition)))
-        }
-      }
-    }
-  }
 
-  private def calculateView(mousePos: ConstVec2) = {
-    val weight = 0.1f
-    val angleHorizontal = ((mousePos.x - 400f) / -400f) * weight
-    val angleVertical = ((mousePos.y - 300f) / -300f) * weight
-    ConstMat4(Mat4x3.rotateY(angleHorizontal).rotateX(angleVertical))
+    }
   }
 }
