@@ -21,6 +21,7 @@
 package simx.applications.examples.basic
 
 import simx.components.renderer.jvr.{JVRPickEvent, JVRComponentAspect, JVRInit}
+import simx.core.components.renderer.setup.BasicDisplayConfiguration
 import simx.core.{ApplicationConfig, SimXApplicationMain, SimXApplication}
 import simx.core.component.{Soft, ExecutionStrategy}
 import simx.core.components.renderer.createparameter.ReadFromElseWhere
@@ -47,7 +48,7 @@ import simx.core.components.io.SpeechEvents
  * @author Dennis Wiebusch, Martin Fischbach
  */
 object ExampleApplication extends SimXApplicationMain[ExampleApplication] {
-  val useEditor = askForOption("Use Editor Component?")
+  val useEditor = true//askForOption("Use Editor Component?")
 }
 
 class ExampleApplication(args : Array[String]) extends SimXApplication
@@ -60,7 +61,7 @@ with JVRInit with OpenALInit with RemoteCreation with EventProvider with EventHa
   val gfxName = 'renderer
 
   override protected def applicationConfiguration = ApplicationConfig withComponent
-    JVRComponentAspect(gfxName) /*on "renderNode"*/ and
+    JVRComponentAspect(gfxName, BasicDisplayConfiguration(1280, 800, fullscreen = false)) /*on "renderNode"*/ and
     JBulletComponentAspect(physicsName, ConstVec3(0, -9.81f, 0)) /*on "physicsNode"*/ and
     LWJGLSoundComponentAspect(soundName) /*on "soundNode"*/ and
     EditorComponentAspect(editorName, appName = "MasterControlProgram") iff ExampleApplication.useEditor
@@ -128,7 +129,7 @@ with JVRInit with OpenALInit with RemoteCreation with EventProvider with EventHa
   private def initializePicking(){
     var clickedOnce = Set[Entity]()
     JVRPickEvent.observe{
-      _.get(types.Entity).collect{
+      event => if (event.get(types.Enabled).getOrElse(false)) event.get(types.Entity).collect{
         case entity if !clickedOnce.contains(entity) =>
           println("picked " + entity)
           clickedOnce = clickedOnce + entity

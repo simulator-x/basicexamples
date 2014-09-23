@@ -21,6 +21,15 @@
     <orderEntry type="module" module-name="editor" exported="" />
     <orderEntry type="module" module-name="lwjgl-sound" exported="" />
     <orderEntry type="module" module-name="vrpn" exported="" />
+    <orderEntry type="module-library">
+      <library>
+        <CLASSES>
+          <root url="file://$MODULE_DIR$/basicexamples/configs" />
+        </CLASSES>
+        <JAVADOC />
+        <SOURCES />
+      </library>
+    </orderEntry>
   </component>
 </module>
 
