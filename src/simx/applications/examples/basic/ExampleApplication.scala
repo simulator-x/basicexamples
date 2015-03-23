@@ -20,35 +20,36 @@
 
 package simx.applications.examples.basic
 
-import simx.components.renderer.jvr.{JVRPickEvent, JVRComponentAspect, JVRInit}
-import simx.core.components.renderer.setup.BasicDisplayConfiguration
-import simx.core.{ApplicationConfig, SimXApplicationMain, SimXApplication}
-import simx.core.component.{Soft, ExecutionStrategy}
-import simx.core.components.renderer.createparameter.ReadFromElseWhere
-import simx.core.components.physics.ImplicitEitherConversion._
-import simx.core.entity.Entity
-import simx.core.ontology.{types, EntityDescription}
-import simx.components.sound.{SoundMaterial, LWJGLSoundComponentAspect, OpenALInit}
-import simx.core.components.renderer.createparameter.ShapeFromFile
-import simx.core.components.physics.PhysSphere
-import simx.applications.examples.basic.objects.{Sounds, Ball, Light, Table}
-import simx.core.svaractor.SVarActor
-import simx.core.component.remote.RemoteCreation
-import simx.core.worldinterface.naming.NameIt
-import simx.components.physics.jbullet.JBulletComponentAspect
-import simx.components.editor.EditorComponentAspect
+
 import simplex3d.math.float._
-import collection.immutable
-import util.Random
-import simx.core.worldinterface.eventhandling.{EventHandler, EventProvider}
+import simx.applications.examples.basic.objects.{Ball, Light, Sounds, Table}
+import simx.components.editor.EditorComponentAspect
+import simx.components.physics.jbullet.JBulletComponentAspect
+import simx.components.renderer.jvr.{JVRComponentAspect, JVRInit, JVRPickEvent}
+import simx.components.sound.{LWJGLSoundComponentAspect, OpenALInit, SoundMaterial}
+import simx.core.component.remote.RemoteCreation
+import simx.core.component.{ExecutionStrategy, Soft}
 import simx.core.components.io.SpeechEvents
+import simx.core.components.physics.ImplicitEitherConversion._
+import simx.core.components.physics.PhysSphere
+import simx.core.components.renderer.createparameter.{ReadFromElseWhere, ShapeFromFile}
+import simx.core.components.renderer.setup.BasicDisplayConfiguration
+import simx.core.entity.Entity
+import simx.core.ontology.{EntityDescription, types}
+import simx.core.svaractor.SVarActor
+import simx.core.worldinterface.eventhandling.{EventHandler, EventProvider}
+import simx.core.worldinterface.naming.NameIt
+import simx.core.{ApplicationConfig, SimXApplication, SimXApplicationMain}
+
+import scala.collection.immutable
+import scala.util.Random
 
 /**
  * TODO: Document
  * @author Dennis Wiebusch, Martin Fischbach
  */
 object ExampleApplication extends SimXApplicationMain[ExampleApplication] {
-  val useEditor = true//askForOption("Use Editor Component?")
+  val useEditor = askForOption("Use Editor Component?")
 }
 
 class ExampleApplication(args : Array[String]) extends SimXApplication
@@ -94,7 +95,7 @@ with JVRInit with OpenALInit with RemoteCreation with EventProvider with EventHa
         ),
         ShapeFromFile(
           file           = "assets/vis/ball.dae",
-          scale          = ConstMat4(Mat4x3.scale(ballRadius*2f)),
+          scale          = Mat4x3.scale(ballRadius*2f),
           transformation = ReadFromElseWhere
         ),
         SoundMaterial("ball"),
@@ -111,7 +112,6 @@ with JVRInit with OpenALInit with RemoteCreation with EventProvider with EventHa
 
   private def entityComplete(e: Entity) {println("[info][ExampleApplication] Completed entity " + e)}
 
-
   protected def removeFromLocalRep(e : Entity){println("[info][ExampleApplication] Removed entity " + e)}
 
   protected def finishConfiguration() {
@@ -119,7 +119,7 @@ with JVRInit with OpenALInit with RemoteCreation with EventProvider with EventHa
     initializePicking()
     initializeBallSpawning()
     initializeMouseControl()
-    SpeechEvents.token.observe{ event =>
+    SpeechEvents.token.observe { event =>
       val text = event.values.firstValueFor(types.String)
       println("[info][ExampleApplication] Test event received. Contained sting is: " + text)
     }
@@ -143,24 +143,29 @@ with JVRInit with OpenALInit with RemoteCreation with EventProvider with EventHa
     }
   }
 
-  private def rotateTable() {
+  var f = 0.1f
+  private def rotateTable() : Unit = {
     addJobIn(16L){
-      tableEntityOption.collect{ case tableEntity =>
+      if (tableEntityOption.isDefined){
+        val tableEntity = tableEntityOption.get
+
         //In complex applications it is reasonable to check if the list is not empty, rather than just call 'head'
-        tableEntity.get(types.Transformation).first(
+        tableEntity.get(types.Transformation).head(
           currentTransform => tableEntity.set(types.Transformation(rotate(currentTransform))))
       }
-      rotateTable()
+      rt()
     }
   }
+
+  val rt : () => Unit  = () => rotateTable()
 
   private def rotate(mat: ConstMat4) =
     mat * ConstMat4(Mat4x3.rotateY(0.01f))
 
   private def initializeBallSpawning() {
     handleDevice(types.Keyboard){ keyboardEntity =>
-      keyboardEntity.observe(types.Key_Space).first( pressed => if(pressed) spawnBall() )
-      keyboardEntity.observe(types.Key_t).first{ pressed =>
+      keyboardEntity.observe(types.Key_Space).head( pressed => if(pressed) spawnBall() )
+      keyboardEntity.observe(types.Key_t).head{ pressed =>
         if(pressed) {
           println("[info][ExampleApplication] Test event emitted")
           SpeechEvents.token.emit(types.String("test"), types.Time(10L))
@@ -175,9 +180,10 @@ with JVRInit with OpenALInit with RemoteCreation with EventProvider with EventHa
     ballCounter += 1
     val randomOffset = Vec3(Random.nextFloat(), Random.nextFloat(), Random.nextFloat()) * 0.05f
     Ball("ball#" + ballCounter, ballRadius, ballPosition + randomOffset) realize {
-      newBallEntity => newBallEntity.observe(types.Transformation).first {
-        newTransform => if(extractHeight(newTransform) < -2f) newBallEntity.remove()
-      }
+      newBallEntity =>
+        newBallEntity.observe(types.Transformation).head {
+          newTransform => if(extractHeight(newTransform) < -2f) newBallEntity.remove()
+        }
     }
   }
 
@@ -192,7 +198,7 @@ with JVRInit with OpenALInit with RemoteCreation with EventProvider with EventHa
   private def initializeMouseControl() {
     handleDevice(types.User)(doIt)
     handleDevice(types.Mouse){ mouseEntity =>
-      mouseEntity.observe(types.Position2D).first{
+      mouseEntity.observe(types.Position2D).head{
         newMousePosition => userEntityOption.collect{
           case userEntity => userEntity.set(types.ViewPlatform(calculateView(newMousePosition)))
         }
@@ -200,10 +206,10 @@ with JVRInit with OpenALInit with RemoteCreation with EventProvider with EventHa
     }
   }
 
-  private def calculateView(mousePos: ConstVec2) = {
+  private def calculateView(mousePos: ConstVec2) : ConstMat4 = {
     val weight = 0.1f
     val angleHorizontal = ((mousePos.x - 400f) / -400f) * weight
     val angleVertical = ((mousePos.y - 300f) / -300f) * weight
-    ConstMat4(Mat4x3.rotateY(angleHorizontal).rotateX(angleVertical))
+    Mat4x3.rotateY(angleHorizontal).rotateX(angleVertical)
   }
 }

@@ -37,11 +37,10 @@ object SimxRemoteApplication extends SimXApplicationMain[SimxRemoteApplication]
 
 class SimxRemoteApplication(args : Array[String]) extends SimXApplication with JOGLInit with OpenALInit with RemoteCreation
 {
-  protected def createComponents(){
+  protected def finishConfiguration(): Unit ={
+    registerComponentCreationSupport[LWJGLSoundComponent]("soundNode")
     registerComponentCreationSupport[JBulletComponent]("renderNode")
     registerComponentCreationSupport[JVRConnector]("physicsNode")
-    registerComponentCreationSupport[LWJGLSoundComponent]("soundNode")
-    componentsCreated()
   }
 
   /**
@@ -50,7 +49,6 @@ class SimxRemoteApplication(args : Array[String]) extends SimXApplication with J
   override protected def applicationConfiguration = ApplicationConfig(Nil)
 
   protected def configureComponents(components: Map[Symbol, SVarActor.Ref]){}
-  protected def finishConfiguration(){}
   protected def createEntities(){}
   protected def removeFromLocalRep(e : Entity){}
 }

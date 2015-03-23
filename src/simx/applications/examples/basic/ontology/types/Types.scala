@@ -20,7 +20,6 @@
 
 package simx.applications.examples.basic.ontology.types
 
-import simx.core.ontology.SVarDescription
-import simx.core.ontology.Symbols
+import simx.core.ontology.SValDescription
 
-object Transformation extends SVarDescription[simplex3d.math.floatx.ConstVec3f, simplex3d.math.floatx.ConstMat4f](simx.core.ontology.types.Transformation as Symbols.transformation withType classOf[simplex3d.math.floatx.ConstVec3f] definedAt "http://www.hci.uni-wuerzburg.de/ontologies/simx/SimxCoreOntology.owl#Transformation")
+object Transformation extends SValDescription(simx.core.ontology.types.Transformation withType classOf[simplex3d.math.floatx.ConstVec3f] definedAt "http://www.hci.uni-wuerzburg.de/ontologies/simx/SimxCoreOntology.owl#Transformation")

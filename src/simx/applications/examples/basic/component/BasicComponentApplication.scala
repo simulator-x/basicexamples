@@ -25,7 +25,7 @@ import simx.components.renderer.jvr.JVRInit
 import simx.core.ontology.EntityDescription
 import simx.core.{ApplicationConfig, SimXApplicationMain, SimXApplication}
 import simx.core.component.{Soft, ExecutionStrategy}
-import simx.core.components.renderer.messages.EffectsConfiguration
+import simx.core.components.renderer.messages.{ConfigureRenderer, EffectsConfiguration}
 import simx.core.components.renderer.createparameter.ShapeFromFile
 import simx.applications.examples.basic.objects.Light
 
@@ -57,7 +57,7 @@ class BasicComponentApplication extends SimXApplication with JVRInit{
   private val rendererComponent = 'renderer
 
   protected def applicationConfiguration = ApplicationConfig withComponent
-    JVRComponentAspect(rendererComponent, BasicDisplayConfiguration(800, 600), EffectsConfiguration("low","none")) and
+    JVRComponentAspect(rendererComponent) and
     ExampleComponentAspect(exampleComponent)
 
 
@@ -72,6 +72,9 @@ class BasicComponentApplication extends SimXApplication with JVRInit{
   protected def configureComponents(components: immutable.Map[Symbol, SVarActor.Ref]) {
     // get access to components
     val (renderer, exampleComp) = (components(rendererComponent), components(exampleComponent))
+
+    // send config to renderer
+    renderer ! ConfigureRenderer( BasicDisplayConfiguration(800, 600), EffectsConfiguration("low","none") )
 
     // register for exit on close:
     exitOnClose(renderer, shutdown)

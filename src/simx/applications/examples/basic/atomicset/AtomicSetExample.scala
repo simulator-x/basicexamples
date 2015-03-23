@@ -35,20 +35,20 @@ object AtomicSetExample {
   class AnotherActor extends MultiObserve with EntityUpdateHandling{
     override protected def removeFromLocalRep(e: Entity){}
     addHandler[(Entity, Entity)]{
-      case (e1, e2) =>
-        println("another actor got " + e1 + " and " + e2)
-        observe(e1, types.Time, types.Transformation)  onUpdate {
+      msg =>
+        println("another actor got " + msg._1 + " and " + msg._2)
+        observe(msg._1, types.Time, types.Transformation)  onUpdate {
           (values, updated) =>
             val toPrint = updated.map( triple => values.get(triple._2).filter(_._1 equals triple._3).map( _._2 + " -> " + triple._2))
             println(toPrint.mkString("\n\t"))
         }
-        val x = sender
+        val x = sender()
         addJobIn(1000) {
-          x ! GotIt(e1, e2)
+          x ! GotIt(msg._1, msg._2)
         }
     }
 
-    addHandler[String](println)
+    addHandler[String](x => println(x))
   }
 
   class ExampleActor(anotherActor : SVarActor.Ref) extends AtomicSetSupport with EntityUpdateHandling{
@@ -68,21 +68,21 @@ object AtomicSetExample {
       println("starting")
     }
 
-    addHandler[GotIt]{ case GotIt(e1, e2) =>
+    addHandler[GotIt]{ msg =>
       println("got that he got it, getting on ;)")
       atomicSet{
-        e1.set(types.Transformation(simplex3d.math.float.Mat4.Zero))
+        msg.e1.set(types.Transformation(simplex3d.math.float.Mat4.Zero))
 
-        e1.set(types.Time(System.currentTimeMillis()))
+        msg.e1.set(types.Time(System.currentTimeMillis()))
       }
 
       anotherActor ! "more simulated messages from other actor"
       anotherActor ! "more simulated messages from other actor"
 
       atomicSet{
-        e1.set(types.Transformation(simplex3d.math.float.Mat4.Identity))
+        msg.e1.set(types.Transformation(simplex3d.math.float.Mat4.Identity))
         anotherActor ! "simulated message from other actor"
-        e2.set(types.Time(System.currentTimeMillis()))
+        msg.e2.set(types.Time(System.currentTimeMillis()))
       }
     }
   }

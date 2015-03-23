@@ -36,7 +36,7 @@ import simx.core.entity.component.ComponentAspect
  * Object to define some component related values
  */
 object ExampleComponent{
-  val componentType = OntologySymbol('exampleComponent)
+  object componentType extends OntologySymbol('exampleComponent)
 }
 
 

@@ -22,11 +22,52 @@
     <Prefix name="rdf" IRI="http://www.w3.org/1999/02/22-rdf-syntax-ns#"/>
     <Prefix name="xsd" IRI="http://www.w3.org/2001/XMLSchema#"/>
     <Prefix name="rdfs" IRI="http://www.w3.org/2000/01/rdf-schema#"/>
-    <Import>http://www.hci.uni-wuerzburg.de/ontologies/simx/components/sound/LWJGL-Sound/LWJGL-Sound.owl</Import>
-    <Import>http://www.hci.uni-wuerzburg.de/ontologies/simx/components/editor/Editor.owl</Import>
-    <Import>http://www.hci.uni-wuerzburg.de/ontologies/simx/components/renderer/JVR/JVR.owl</Import>
-    <Import>http://www.hci.uni-wuerzburg.de/ontologies/simx/components/physics/JBullet/JBullet.owl</Import>
-    <Import>http://www.hci.uni-wuerzburg.de/ontologies/simx/components/renderer/Gui/Gui.owl</Import>
+    <Import>http://www.hci.uni-wuerzburg.de/ontologies/simx_testing/components/renderer/Gui/Gui.owl</Import>
+    <Import>http://www.hci.uni-wuerzburg.de/ontologies/simx_testing/components/editor/Editor.owl</Import>
+    <Import>http://www.hci.uni-wuerzburg.de/ontologies/simx_testing/components/renderer/JVR/JVR.owl</Import>
+    <Import>http://www.hci.uni-wuerzburg.de/ontologies/simx_testing/components/physics/JBullet/JBullet.owl</Import>
+    <Import>http://www.hci.uni-wuerzburg.de/ontologies/simx_testing/components/sound/LWJGL-Sound/LWJGL-Sound.owl</Import>
+    <Declaration>
+        <Class IRI="#Ball"/>
+    </Declaration>
+    <Declaration>
+        <NamedIndividual IRI="#BallEntityDescription"/>
+    </Declaration>
+    <EquivalentClasses>
+        <Class IRI="http://www.hci.uni-wuerzburg.de/ontologies/simx/concepts/BasicDescriptions.owl#UserDescription"/>
+        <ObjectSomeValuesFrom>
+            <ObjectProperty IRI="http://www.hci.uni-wuerzburg.de/ontologies/simx/concepts/BasicDescriptions.owl#describesProperty"/>
+            <Class IRI="http://www.hci.uni-wuerzburg.de/ontologies/simx/concepts/BasicTypes.owl#User"/>
+        </ObjectSomeValuesFrom>
+    </EquivalentClasses>
+    <SubClassOf>
+        <Class IRI="#Ball"/>
+        <Class IRI="http://www.hci.uni-wuerzburg.de/ontologies/simx/SimxCoreOntology.owl#Entity"/>
+    </SubClassOf>
+    <SubClassOf>
+        <ObjectIntersectionOf>
+            <Class IRI="http://www.hci.uni-wuerzburg.de/ontologies/simx/components/physics/SimxPhysics.owl#PhysSphere"/>
+            <Class IRI="http://www.hci.uni-wuerzburg.de/ontologies/simx/components/sound/SimxSound.owl#SoundMaterialAspect"/>
+            <Class IRI="http://www.hci.uni-wuerzburg.de/ontologies/simx/concepts/BasicTypes.owl#ShapeFromFile"/>
+        </ObjectIntersectionOf>
+        <Class IRI="#Ball"/>
+    </SubClassOf>
+    <ClassAssertion>
+        <ObjectSomeValuesFrom>
+            <ObjectProperty IRI="http://www.hci.uni-wuerzburg.de/ontologies/simx/concepts/BasicDescriptions.owl#describesProperty"/>
+            <Class IRI="#Ball"/>
+        </ObjectSomeValuesFrom>
+        <NamedIndividual IRI="#BallEntityDescription"/>
+    </ClassAssertion>
+    <ObjectPropertyAssertion>
+        <Annotation>
+            <AnnotationProperty IRI="http://www.hci.uni-wuerzburg.de/ontologies/simx/SimxCoreOntology.owl#overridesProvide"/>
+            <IRI>http://www.hci.uni-wuerzburg.de/ontologies/simx/concepts/BasicTypes.owl#Transformation</IRI>
+        </Annotation>
+        <ObjectProperty IRI="http://www.hci.uni-wuerzburg.de/ontologies/simx/SimxCoreOntology.owl#hasAspect"/>
+        <NamedIndividual IRI="#BallEntityDescription"/>
+        <NamedIndividual IRI="http://www.hci.uni-wuerzburg.de/ontologies/simx/components/renderer/JVR/JVR.owl#SimXJVR_ShapeFromFileAspectDescription"/>
+    </ObjectPropertyAssertion>
 </Ontology>
 
 
