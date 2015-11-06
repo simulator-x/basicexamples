@@ -1,4 +1,4 @@
-#version 100
+#version 150
 precision highp float;
 /**
  * Copyright 2013 Marc Roßbach
@@ -18,9 +18,11 @@ precision highp float;
  
 uniform sampler2D jvr_DS_AmbientColor;
 
-varying vec2 texCoord;
+in vec2 texCoord;
+
+out vec4 final_color;
 
 void main (void)
 {
-	gl_FragColor = texture2D(jvr_DS_AmbientColor, texCoord);
+	final_color = texture(jvr_DS_AmbientColor, texCoord);
 }

@@ -1,4 +1,4 @@
-#version 100
+#version 150
 precision highp float;
 /**
  * Copyright 2013 Marc Roßbach
@@ -27,7 +27,9 @@ uniform float jvr_LightSource_SpotCosCutOff;
 
 uniform sampler2D NormalTex;
 uniform sampler2D EyeVecTex;
-varying vec2  texCoord;
+in vec2  texCoord;
+
+out vec4 final_color;
 
 vec4 phong(vec3 L, vec3 E, vec3 N, vec4 kst, vec4 kdt)
 {
@@ -49,11 +51,11 @@ void main (void)
    	vec4 kst = vec4(0.9,0.9,0.9,1);
    	vec4 kdt = vec4(1,1,1,1);
 
-	vec3 N = normalize(texture2D(NormalTex, texCoord).rgb);
-	vec3 E = (texture2D(EyeVecTex, texCoord).rgb);
+	vec3 N = normalize(texture(NormalTex, texCoord).rgb);
+	vec3 E = (texture(EyeVecTex, texCoord).rgb);
 	vec3 L = normalize(jvr_LightSource_Position.xyz + E);
 	E = normalize(E);
 
-	gl_FragColor = phong(L, E, N, kst, kdt);
-	gl_FragColor.a = 1.0;
+	final_color = phong(L, E, N, kst, kdt);
+	final_color.a = 1.0;
 }

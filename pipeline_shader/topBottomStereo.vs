@@ -1,11 +1,11 @@
-#version 100
+#version 150
 precision highp float;
-attribute vec4 jvr_Vertex;
-attribute vec2 jvr_TexCoord;
+in vec4 jvr_Vertex;
+in vec2 jvr_TexCoord;
 
 uniform mat4  jvr_ProjectionMatrix;
 
-varying   vec2 texCoord;
+out   vec2 texCoord;
 
 void main(void)
 {

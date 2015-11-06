@@ -1,4 +1,4 @@
-#version 100
+#version 150
 precision highp float;
 /**
  * Copyright 2013 Marc Roßbach
@@ -19,13 +19,15 @@ precision highp float;
 uniform sampler2D jvr_Texture0;
 uniform sampler2D jvr_Texture1;
 uniform float intensity;
-varying vec2 texCoord;
+in vec2 texCoord;
+
+out vec4 fragColor;
 
 float linearizeDepth()
 {
   float n = 0.1;
   float f = 100.0;
-  float z = texture2D(jvr_Texture0, texCoord).x;
+  float z = texture(jvr_Texture0, texCoord).x;
   return (2.0 * n) / (f + n - z * (f - n));
 }
 
@@ -45,7 +47,7 @@ vec4 blur(float z)
    			{
    				texC = texCoord;
    			}
-   			final_color += texture2D(jvr_Texture1, texC);
+   			final_color += texture(jvr_Texture1, texC);
    		}
    	}
 
@@ -58,7 +60,7 @@ vec4 blur(float z)
 vec4 fastblur(float z)
 {    	
    	// use mipmapping levels
-	vec4 final_color = texture2DLod(jvr_Texture1, texCoord, z * intensity);
+	vec4 final_color = textureLod(jvr_Texture1, texCoord, z * intensity);
    	final_color.w = 1.0;
 	return final_color;
 }
@@ -69,5 +71,5 @@ void main (void)
 	//vec4 final_color = fastblur(z);
 	vec4 final_color = blur(z);
 	
-	gl_FragColor = final_color;
+	fragColor = final_color;
 }

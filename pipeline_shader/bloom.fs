@@ -1,4 +1,4 @@
-#version 100
+#version 150
 precision highp float;
 /**
  * Copyright 2013 Marc Roßbach
@@ -18,17 +18,19 @@ precision highp float;
 
 uniform sampler2D jvr_Texture0;
 uniform sampler2D jvr_Texture1;
-varying vec2 texCoord;
+in vec2 texCoord;
+
+out vec4 fragColor;
 
 vec4 fastblur(float intensity)
 {    	
    	// use mipmapping levels
-	vec4 final_color = texture2DLod(jvr_Texture0, texCoord, intensity);
+	vec4 final_color = textureLod(jvr_Texture0, texCoord, intensity);
    	final_color.w = 1.0;
 	return final_color;
 }
 
 void main (void)
 {
-	gl_FragColor = fastblur(5.5) + texture2D(jvr_Texture1, texCoord);
+	fragColor = fastblur(5.5) + texture(jvr_Texture1, texCoord);
 }

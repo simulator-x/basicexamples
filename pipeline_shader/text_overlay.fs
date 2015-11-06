@@ -23,7 +23,9 @@ uniform vec2 size[128];
 uniform int lettersCount;
 uniform vec2 gridSize;
 
-varying vec2 texCoord;
+in vec2 texCoord;
+
+out vec4 final_color;
 
 void main (void)
 {
@@ -42,7 +44,7 @@ void main (void)
 			vec2 fontCoord = letters[i];
 			fontCoord.x += ((screenPos.x - positions[i].x)/size[i].x) * gridSize.x;
 			fontCoord.y += ((screenPos.y - positions[i].y)/size[i].y) * gridSize.y;
-			gl_FragColor = texture2D(jvr_Texture0, fontCoord);
+			final_color = texture(jvr_Texture0, fontCoord);
 			found = true;
 		}
 	}

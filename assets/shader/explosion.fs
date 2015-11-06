@@ -1,4 +1,4 @@
-#version 100
+#version 150
 precision highp float;
 
 uniform sampler2D sceneMap;
@@ -7,7 +7,9 @@ uniform float posY;
 uniform float time;
 uniform vec4 color;
 
-varying vec2 texCoord;
+in vec2 texCoord;
+
+out vec4 final_color;
 
 void main() 
 { 
@@ -29,7 +31,7 @@ void main()
     colorFactor = (1.0 - (abs(time - distancee) / shockParams.z)) * (1.0 - distance(texCoord, center));
     newTexCoord = texCoord + (diffUV * diffTime);
   } 
-  gl_FragColor = texture2D(sceneMap, newTexCoord) + (color * colorFactor);
+  final_color = texture(sceneMap, newTexCoord) + (color * colorFactor);
 }
 
 
