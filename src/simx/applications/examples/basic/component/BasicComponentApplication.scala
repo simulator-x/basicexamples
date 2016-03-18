@@ -25,15 +25,15 @@ import simx.components.renderer.jvr.JVRInit
 import simx.core.ontology.EntityDescription
 import simx.core.{ApplicationConfig, SimXApplicationMain, SimXApplication}
 import simx.core.component.{Soft, ExecutionStrategy}
-import simx.core.components.renderer.messages.{ConfigureRenderer, EffectsConfiguration}
+import simx.core.components.physics.ImplicitEitherConversion._
 import simx.core.components.renderer.createparameter.ShapeFromFile
 import simx.applications.examples.basic.objects.Light
 
 import collection.immutable
 import simplex3d.math.floatx.{Mat4x3f, ConstVec3f,  ConstMat4f}
 import simx.core.svaractor.SVarActor
-import simx.core.components.renderer.setup.BasicDisplayConfiguration
 import simx.core.entity.Entity
+
 
 
 /**
@@ -67,14 +67,12 @@ class BasicComponentApplication extends SimXApplication with JVRInit{
 
   /**
    * called after all components were created
+ *
    * @param components the map of components, accessible by their names
    */
   protected def configureComponents(components: immutable.Map[Symbol, SVarActor.Ref]) {
     // get access to components
     val (renderer, exampleComp) = (components(rendererComponent), components(exampleComponent))
-
-    // send config to renderer
-    renderer ! ConfigureRenderer( BasicDisplayConfiguration(800, 600), EffectsConfiguration("low","none") )
 
     // register for exit on close:
     exitOnClose(renderer, shutdown)
@@ -96,7 +94,7 @@ class BasicComponentApplication extends SimXApplication with JVRInit{
       //
       scale          = ConstMat4f(Mat4x3f.scale(radius * 0.5f)),
       // set the transfiormation of the ball
-      transformation = Right(ConstMat4f(Mat4x3f.translate(position)))
+      transformation = ConstMat4f(Mat4x3f.translate(position))
     )
   )
 

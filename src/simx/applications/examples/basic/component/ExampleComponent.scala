@@ -21,7 +21,7 @@
 package simx.applications.examples.basic.component
 
 import simx.core.ontology.{GroundedSymbol, Symbols}
-import simx.core.ontology.types.{OntologySymbol, Transformation, Identifier}
+import simx.core.ontology.types.{Transformation, Identifier}
 import simx.core.entity.typeconversion.{ Converter, ConvertibleTrait}
 import simx.core.entity.description._
 import simx.core.entity.Entity
@@ -36,7 +36,7 @@ import simx.core.entity.component.ComponentAspect
  * Object to define some component related values
  */
 object ExampleComponent{
-  object componentType extends OntologySymbol('exampleComponent)
+  val componentType = Symbols.example
 }
 
 
