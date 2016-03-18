@@ -33,7 +33,7 @@ import collection.immutable
 import simplex3d.math.floatx.{Mat4x3f, ConstVec3f,  ConstMat4f}
 import simx.core.svaractor.SVarActor
 import simx.core.entity.Entity
-
+import simx.core.components.physics.ImplicitEitherConversion._
 
 
 /**
